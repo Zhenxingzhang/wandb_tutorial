@@ -1,0 +1,91 @@
+"""
+This Weights & Biases sample script trains a basic CNN on the
+Fashion-MNIST dataset. It takes black and white images of clothing
+and labels them as "pants", "belt", etc. This script is designed
+to demonstrate the wandb integration with Keras.
+"""
+
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dropout, Dense, Flatten
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.callbacks import Callback, LearningRateScheduler
+from tensorflow.keras import backend as K
+import tensorflow as tf
+import random
+
+# Import wandb libraries
+import wandb
+from wandb.keras import WandbCallback
+
+# Initialize wandb
+wandb.init(project="sample-project")
+config = wandb.config
+
+# Track hyperparameters
+config.dropout = 0.2
+config.hidden_layer_size = 128
+config.layer_1_size = 16
+config.layer_2_size = 32
+config.learn_rate = 0.01
+config.decay = 1e-3
+config.momentum = 0.9
+config.epochs = 100
+
+(X_train_orig, y_train_orig), (X_test, y_test) = fashion_mnist.load_data()
+
+# Reducing the dataset size to 10,000 examples for faster train time
+true = list(map(lambda x: True if random.random() < 0.167 else False, range(60000)))
+ind = []
+for i, x in enumerate(true):
+    if x == True: ind.append(i)
+
+X_train = X_train_orig[ind, :, :]
+y_train = y_train_orig[ind]
+
+img_width=28
+img_height=28
+labels =["T-shirt/top","Trouser","Pullover","Dress",
+    "Coat","Sandal","Shirt","Sneaker","Bag","Ankle boot"]
+
+X_train = X_train.astype('float32')
+X_train /= 255.
+X_test = X_test.astype('float32')
+X_test /= 255.
+
+# reshape input data
+X_train = X_train.reshape(X_train.shape[0], img_width, img_height, 1)
+X_test = X_test.reshape(X_test.shape[0], img_width, img_height, 1)
+
+# one hot encode outputs
+num_classes = 10
+
+
+class SGDLearningRateTracker(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        optimizer = self.model.optimizer
+        lr = K.eval(optimizer.lr * (1. / (1. + optimizer.decay * tf.dtypes.cast(optimizer.iterations, tf.float32))))
+        tf.summary.scalar('learning rate', data=lr, step=epoch)
+        print('\nLR: {:.6f}\n'.format(lr))
+        wandb.log({'learning_rate': lr, 'epoch': epoch})
+
+
+sgd = SGD(lr=config.learn_rate, decay=config.decay, momentum=config.momentum,
+                            nesterov=True)
+
+# build model
+model = Sequential()
+model.add(Conv2D(config.layer_1_size, (5, 5), activation='relu',
+                            input_shape=(img_width, img_height,1)))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(config.layer_2_size, (5, 5), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(config.dropout))
+model.add(Flatten())
+model.add(Dense(config.hidden_layer_size, activation='relu'))
+model.add(Dense(num_classes, activation='softmax'))
+
+# Add Keras WandbCallback
+model.compile(loss='sparse_categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+model.fit(X_train, y_train,  validation_data=(X_test, y_test), epochs=config.epochs,
+          callbacks=[WandbCallback(data_type="image", labels=labels), SGDLearningRateTracker()])
