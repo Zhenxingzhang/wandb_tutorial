@@ -5,7 +5,8 @@ metric:
   goal: minimize
 parameters:
   learning_rate:
+#    values: [0.01]
     min: 0.001
     max: 0.1
-  optimizer:
-    values: ["adam", "sgd"]
+#  optimizer:
+#    values: ["adam", "sgd"]

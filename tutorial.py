@@ -18,19 +18,21 @@ import random
 import wandb
 from wandb.keras import WandbCallback
 
-# Initialize wandb
-wandb.init(project="sample-project")
-config = wandb.config
-
+hyper_params_default = dict(
 # Track hyperparameters
-config.dropout = 0.2
-config.hidden_layer_size = 128
-config.layer_1_size = 16
-config.layer_2_size = 32
-config.learn_rate = 0.01
-config.decay = 1e-3
-config.momentum = 0.9
-config.epochs = 100
+  dropout = 0.2,
+  hidden_layer_size = 128,
+  layer_1_size = 16,
+  layer_2_size = 32,
+  learning_rate = 0.01,
+  decay = 1e-3,
+  momentum = 0.9,
+  epochs = 100
+)
+
+# Initialize wandb
+wandb.init(config=hyper_params_default, project="sample-project")
+config = wandb.config
 
 (X_train_orig, y_train_orig), (X_test, y_test) = fashion_mnist.load_data()
 
@@ -64,13 +66,14 @@ num_classes = 10
 class SGDLearningRateTracker(Callback):
     def on_epoch_end(self, epoch, logs={}):
         optimizer = self.model.optimizer
+
         lr = K.eval(optimizer.lr * (1. / (1. + optimizer.decay * tf.dtypes.cast(optimizer.iterations, tf.float32))))
         tf.summary.scalar('learning rate', data=lr, step=epoch)
-        print('\nLR: {:.6f}\n'.format(lr))
+        print('\n, LR: {:.6f}\n'.format(lr))
         wandb.log({'learning_rate': lr, 'epoch': epoch})
 
 
-sgd = SGD(lr=config.learn_rate, decay=config.decay, momentum=config.momentum,
+sgd = SGD(lr=config.learning_rate, decay=config.decay, momentum=config.momentum,
                             nesterov=True)
 
 # build model
