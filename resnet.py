@@ -171,7 +171,7 @@ if __name__ == '__main__':
     )
 
     # Initialize wandb
-    wandb.init(config=hyper_params_default, project="sample-project")
+    wandb.init(config=hyper_params_default, project="cifar-10")
     config = wandb.config
 
     # Load the CIFAR10 data.
@@ -205,4 +205,4 @@ if __name__ == '__main__':
               epochs=config.epochs,
               validation_data=(x_test, y_test),
               shuffle=True,
-              callbacks=[])
+              callbacks=[WandbCallback(data_type="image")])
