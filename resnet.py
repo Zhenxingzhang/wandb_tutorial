@@ -1,4 +1,5 @@
 from tensorflow.keras.layers import Conv2D, Dense, BatchNormalization, Activation
+from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Input, Flatten, AveragePooling2D
 from tensorflow.keras.regularizers import l2
@@ -32,6 +33,7 @@ def lr_schedule(epoch):
         lr *= 1e-2
     elif epoch > 80:
         lr *= 1e-1
+    wandb.log({'learning_rate': lr, 'epoch': epoch})
     print('Learning rate: ', lr)
     return lr
 
@@ -174,6 +176,8 @@ if __name__ == '__main__':
     wandb.init(config=hyper_params_default, project="cifar-10")
     config = wandb.config
 
+    lr_scheduler = LearningRateScheduler(lr_schedule)
+
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -205,4 +209,4 @@ if __name__ == '__main__':
               epochs=config.epochs,
               validation_data=(x_test, y_test),
               shuffle=True,
-              callbacks=[WandbCallback(data_type="image")])
+              callbacks=[WandbCallback(data_type="image"), lr_scheduler])
