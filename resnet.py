@@ -6,6 +6,10 @@ from tensorflow.keras.models import Model
 from tensorflow import keras
 from tensorflow.keras.datasets import fashion_mnist, cifar10
 
+# Import wandb libraries
+import wandb
+from wandb.keras import WandbCallback
+
 
 def lr_schedule(epoch):
     """Learning Rate Schedule
@@ -152,6 +156,22 @@ def resnet_v1(input_shape, depth, num_classes=10):
 
 
 if __name__ == '__main__':
+    hyper_params_default = dict(
+        # Track hyperparameters
+        depth=8,
+        hidden_layer_size=128,
+        layer_1_size=16,
+        layer_2_size=32,
+        learning_rate=0.01,
+        decay=1e-3,
+        momentum=0.9,
+        epochs=100
+    )
+
+    # Initialize wandb
+    wandb.init(config=hyper_params_default, project="sample-project")
+    config = wandb.config
+
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -171,13 +191,7 @@ if __name__ == '__main__':
     print(x_test.shape[0], 'test samples')
     print('y_train shape:', y_train.shape)
 
-    # Computed depth from supplied model parameter n
-    depth = 8
-    batch_size = 64
-    epochs = 200
-    callbacks = []
-
-    model = resnet_v1(input_shape=input_shape, depth=depth)
+    model = resnet_v1(input_shape=input_shape, depth=config.depth)
 
     model.compile(loss='sparse_categorical_crossentropy',
                   optimizer=Adam(learning_rate=lr_schedule(0)),
@@ -185,8 +199,8 @@ if __name__ == '__main__':
     model.summary()
 
     model.fit(x_train, y_train,
-              batch_size=batch_size,
-              epochs=epochs,
+              batch_size=config.batch_size,
+              epochs=config.epochs,
               validation_data=(x_test, y_test),
               shuffle=True,
-              callbacks=callbacks)
+              callbacks=[])
