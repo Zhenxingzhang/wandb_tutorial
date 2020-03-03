@@ -159,13 +159,15 @@ if __name__ == '__main__':
     hyper_params_default = dict(
         # Track hyperparameters
         depth=8,
-        hidden_layer_size=128,
-        layer_1_size=16,
-        layer_2_size=32,
-        learning_rate=0.01,
-        decay=1e-3,
-        momentum=0.9,
-        epochs=100
+        batch_size=64,
+        epochs=200,
+        # hidden_layer_size=128,
+        # layer_1_size=16,
+        # layer_2_size=32,
+        # learning_rate=0.01,
+        # decay=1e-3,
+        # momentum=0.9,
+        # epochs=200
     )
 
     # Initialize wandb
