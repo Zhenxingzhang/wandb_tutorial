@@ -24,14 +24,14 @@ def lr_schedule(epoch):
     # Returns
         lr (float32): learning rate
     """
-    lr = 1e-3
-    if epoch > 180:
+    lr = 5e-4
+    if epoch > 160:
         lr *= 0.5e-3
-    elif epoch > 160:
-        lr *= 1e-3
     elif epoch > 120:
-        lr *= 1e-2
+        lr *= 1e-3
     elif epoch > 80:
+        lr *= 1e-2
+    elif epoch > 40:
         lr *= 1e-1
     wandb.log({'learning_rate': lr, 'epoch': epoch})
     print('Learning rate: ', lr)
