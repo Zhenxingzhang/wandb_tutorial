@@ -174,7 +174,7 @@ if __name__ == '__main__':
         # hidden_layer_size=128,
         # layer_1_size=16,
         # layer_2_size=32,
-        learning_rate=0.01
+        learning_rate=0.001
         # decay=1e-3,
         # momentum=0.9,
         # epochs=200
@@ -184,11 +184,12 @@ if __name__ == '__main__':
     wandb.init(config=hyper_params_default, project="cifar-10")
     config = wandb.config
 
-    lr_scheduler = LearningRateScheduler(lr_schedule, config.learning_rate)
+    # lr_scheduler = LearningRateScheduler(lr_schedule)
 
-    lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
+    lr_reducer = ReduceLROnPlateau(factor=0.2,
+                                   monitor="val_loss",
                                    cooldown=0,
-                                   patience=10,
+                                   patience=5,
                                    min_lr=0.5e-6)
 
     # Load the CIFAR10 data.
@@ -272,4 +273,4 @@ if __name__ == '__main__':
         epochs=config.epochs,
         validation_data=(x_test, y_test),
         shuffle=True,
-        callbacks=[WandbCallback(data_type="image"), lr_scheduler])
+        callbacks=[WandbCallback(data_type="image"), lr_reducer])
