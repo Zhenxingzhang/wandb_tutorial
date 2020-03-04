@@ -188,7 +188,7 @@ if __name__ == '__main__':
 
     lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
                                    cooldown=0,
-                                   patience=5,
+                                   patience=10,
                                    min_lr=0.5e-6)
 
     # Load the CIFAR10 data.
@@ -272,4 +272,4 @@ if __name__ == '__main__':
         epochs=config.epochs,
         validation_data=(x_test, y_test),
         shuffle=True,
-        callbacks=[WandbCallback(data_type="image"), lr_scheduler, lr_reducer])
+        callbacks=[WandbCallback(data_type="image"), lr_scheduler])
