@@ -1,11 +1,12 @@
 from tensorflow.keras.layers import Conv2D, Dense, BatchNormalization, Activation
-from tensorflow.keras.callbacks import LearningRateScheduler
+from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Input, Flatten, AveragePooling2D
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Model
 from tensorflow import keras
 from tensorflow.keras.datasets import fashion_mnist, cifar10
+import numpy as np
 
 # Import wandb libraries
 import wandb
@@ -24,15 +25,15 @@ def lr_schedule(epoch):
     # Returns
         lr (float32): learning rate
     """
-    lr = 5e-4
+    lr = 1e-4
     if epoch > 160:
-        lr *= 0.5e-3
-    elif epoch > 120:
-        lr *= 1e-3
-    elif epoch > 80:
         lr *= 1e-2
-    elif epoch > 40:
+    elif epoch > 120:
+        lr *= 5e-2
+    elif epoch > 80:
         lr *= 1e-1
+    elif epoch > 40:
+        lr *= 5e-1
     wandb.log({'learning_rate': lr, 'epoch': epoch})
     print('Learning rate: ', lr)
     return lr
@@ -65,7 +66,7 @@ def resnet_layer(inputs,
                   strides=strides,
                   padding='same',
                   kernel_initializer='he_normal',
-                  kernel_regularizer=l2(1e-4))
+                  kernel_regularizer=l2(1e-3))
 
     x = inputs
     if conv_first:
@@ -160,8 +161,8 @@ def resnet_v1(input_shape, depth, num_classes=10):
 if __name__ == '__main__':
     hyper_params_default = dict(
         # Track hyperparameters
-        depth=8,
-        batch_size=64,
+        depth=20,
+        batch_size=32,
         epochs=200,
         # hidden_layer_size=128,
         # layer_1_size=16,
@@ -177,6 +178,11 @@ if __name__ == '__main__':
     config = wandb.config
 
     lr_scheduler = LearningRateScheduler(lr_schedule)
+
+    lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
+                                   cooldown=0,
+                                   patience=5,
+                                   min_lr=0.5e-6)
 
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
