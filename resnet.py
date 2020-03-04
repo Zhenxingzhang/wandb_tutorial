@@ -200,7 +200,7 @@ if __name__ == '__main__':
     model = resnet_v1(input_shape=input_shape, depth=config.depth)
 
     model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer=Adam(learning_rate=lr_schedule(0)),
+                  optimizer=Adam(lr=lr_schedule(0)),
                   metrics=['accuracy'])
     model.summary()
 
