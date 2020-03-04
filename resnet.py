@@ -1,5 +1,5 @@
 from tensorflow.keras.layers import Conv2D, Dense, BatchNormalization, Activation
-from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau
+from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau, Callback
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Input, Flatten, AveragePooling2D
 from tensorflow.keras.regularizers import l2
@@ -39,6 +39,15 @@ def lr_schedule(epoch, initial_rate):
     wandb.log({'learning_rate': lr, 'epoch': epoch})
     print('Learning rate: ', lr)
     return lr
+
+
+class SGDLearningRateTracker(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        optimizer = self.model.optimizer
+
+        lr = lr_schedule(epoch, optimizer.lr)
+        print('\n, LR: {:.6f}\n'.format(lr))
+        wandb.log({'learning_rate': lr, 'epoch': epoch})
 
 
 def resnet_layer(inputs,
@@ -174,7 +183,7 @@ if __name__ == '__main__':
         # hidden_layer_size=128,
         # layer_1_size=16,
         # layer_2_size=32,
-        learning_rate=0.001
+        learning_rate=0.0005
         # decay=1e-3,
         # momentum=0.9,
         # epochs=200
@@ -186,10 +195,12 @@ if __name__ == '__main__':
 
     # lr_scheduler = LearningRateScheduler(lr_schedule)
 
-    lr_reducer = ReduceLROnPlateau(factor=0.2,
+    lr_reducer = ReduceLROnPlateau(factor=0.5,
                                    monitor="val_loss",
                                    cooldown=0,
+                                   mode=min,
                                    patience=5,
+                                   verbose=1,
                                    min_lr=0.5e-6)
 
     # Load the CIFAR10 data.
