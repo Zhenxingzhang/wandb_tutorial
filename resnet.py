@@ -161,7 +161,7 @@ def resnet_v1(input_shape, depth, num_classes=10):
 if __name__ == '__main__':
     hyper_params_default = dict(
         # Track hyperparameters
-        depth=20,
+        depth=8,
         batch_size=32,
         epochs=200,
         # hidden_layer_size=128,
@@ -215,4 +215,4 @@ if __name__ == '__main__':
               epochs=config.epochs,
               validation_data=(x_test, y_test),
               shuffle=True,
-              callbacks=[WandbCallback(data_type="image"), lr_scheduler])
+              callbacks=[WandbCallback(data_type="image"), lr_scheduler, lr_reducer])
