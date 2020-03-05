@@ -1,5 +1,5 @@
 from tensorflow.keras.layers import Conv2D, Dense, BatchNormalization, Activation
-from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau, Callback
+from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau, Callback, EarlyStopping
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Input, Flatten, AveragePooling2D
 from tensorflow.keras.regularizers import l2
@@ -203,6 +203,8 @@ if __name__ == '__main__':
                                    verbose=1,
                                    min_lr=5e-6)
 
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10, min_delta=0.0005)
+
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
@@ -284,4 +286,4 @@ if __name__ == '__main__':
         epochs=config.epochs,
         validation_data=(x_test, y_test),
         shuffle=True,
-        callbacks=[WandbCallback(data_type="image"), lr_reducer])
+        callbacks=[WandbCallback(data_type="image"), lr_reducer, es])
