@@ -5,9 +5,8 @@ metric:
   goal: minimize
 parameters:
   learning_rate:
-#    values: [0.01]
     min: 0.0005
-    max: 0.00001
+    max: 0.005
   reg_factor:
     min: 0.0001
     max: 0.1
