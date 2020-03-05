@@ -190,7 +190,7 @@ if __name__ == '__main__':
     )
 
     # Initialize wandb
-    wandb.init(config=hyper_params_default, project="cifar-10")
+    wandb.init(config=hyper_params_default, project="wandb_tutorial")
     config = wandb.config
 
     # lr_scheduler = LearningRateScheduler(lr_schedule)
