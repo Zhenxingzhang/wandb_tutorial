@@ -8,8 +8,6 @@ from tensorflow import keras
 from tensorflow.keras.datasets import fashion_mnist, cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-import numpy as np
-
 # Import wandb libraries
 import wandb
 from wandb.keras import WandbCallback
@@ -176,7 +174,7 @@ def resnet_v1(input_shape, depth, reg_factor, num_classes=10):
 if __name__ == '__main__':
     hyper_params_default = dict(
         # Track hyperparameters
-        depth=8,
+        depth=20,
         batch_size=32,
         epochs=200,
         reg_factor=1e-3,
@@ -203,7 +201,7 @@ if __name__ == '__main__':
                                    verbose=1,
                                    min_lr=5e-6)
 
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10, min_delta=0.0005)
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=20, min_delta=0.0005)
 
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
