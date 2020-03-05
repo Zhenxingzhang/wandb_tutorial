@@ -201,7 +201,7 @@ if __name__ == '__main__':
                                    mode=min,
                                    patience=5,
                                    verbose=1,
-                                   min_lr=0.5e-6)
+                                   min_lr=5e-6)
 
     # Load the CIFAR10 data.
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
