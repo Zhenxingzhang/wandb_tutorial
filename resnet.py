@@ -7,6 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow import keras
 from tensorflow.keras.datasets import fashion_mnist, cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import numpy as np
 
 # Import wandb libraries
 import wandb
@@ -199,7 +200,7 @@ if __name__ == '__main__':
                                    mode=min,
                                    patience=5,
                                    verbose=1,
-                                   min_lr=5e-6)
+                                   min_lr=1e-5)
 
     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=20, min_delta=0.0005)
 
@@ -209,6 +210,15 @@ if __name__ == '__main__':
     # Normalize data.
     x_train = x_train.astype('float32') / 255
     x_test = x_test.astype('float32') / 255
+
+    # Subtracting pixel mean improves accuracy
+    subtract_pixel_mean = True
+
+    # If subtract pixel mean is enabled
+    if subtract_pixel_mean:
+        x_train_mean = np.mean(x_train, axis=0)
+        x_train -= x_train_mean
+        x_test -= x_train_mean
 
     # reshape input data
     # x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
